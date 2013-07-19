@@ -1,4 +1,4 @@
-
+'use strict';
 
 var express = require('express');
 
@@ -30,6 +30,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(Authentication.localStrategy);
+passport.use(Authentication.basicStrategy);
 passport.serializeUser(Authentication.serializeUser);
 passport.deserializeUser(Authentication.deserializeUser);
 
@@ -38,6 +39,10 @@ app.get('/logout', Authentication.logout);
 
 app.get('/user', Authentication.ensureAuthenticated, function(req, res, next) {
   return res.json(req.session.user);
+});
+
+app.get('/api/plans', Authentication.authenticateApi, function(req, res) {
+  return res.json({ok: 'ok'});
 });
 
 module.exports = app;

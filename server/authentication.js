@@ -2,6 +2,7 @@
 
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var BasicStrategy = require('passport-http').BasicStrategy;
 var User = require('./model/user');
 
 module.exports = {
@@ -15,6 +16,18 @@ module.exports = {
         done(null, false, { message: 'Incorrect password.' });
       } else {
         return done(null, user);
+      }
+    }
+  ),
+
+  basicStrategy: new BasicStrategy(
+    function(username, password, done) {
+      var user = User.findApiKeyByName(username);
+
+      if (!user) {
+        done(null, false, { message: 'Invalid API Key.'});
+      } else {
+        done(null, user);
       }
     }
   ),
@@ -65,6 +78,8 @@ module.exports = {
       return res.send(401);
     }
   },
+
+  authenticateApi: passport.authenticate('basic', {session: false}),
 
   csrf: function(req) {
     var token = (req.body && req.body._csrf)

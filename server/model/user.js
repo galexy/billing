@@ -14,6 +14,11 @@ var users = [
     username: 'user',
     password: 'pass',
     role: 'USER'
+  },
+  {
+    id: 3,
+    username: 'foobarbaz',
+    role: 'API'
   }
 ];
 
@@ -24,5 +29,11 @@ module.exports = {
 
   findByUsername: function(username) {
     return _.clone(_.find(users, function(user) { return user.username === username; }));
+  },
+
+  findApiKeyByName: function(username) {
+    return _.clone(_.find(users, function(user) {
+      return user.username === username && user.role === 'API';
+    }));
   }
 };
