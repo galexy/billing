@@ -79,7 +79,15 @@ module.exports = {
     }
   },
 
-  authenticateApi: passport.authenticate('basic', {session: false}),
+  authenticateApi: (function() {
+    var basicAuth = passport.authenticate('basic', {session: false});
+    return function(req, res, next) {
+      if (req.isAuthenticated()) {
+        return next();
+      }
+      basicAuth(req, res, next);
+    };
+  })(),
 
   csrf: function(req) {
     var token = (req.body && req.body._csrf)
