@@ -3,7 +3,7 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var BasicStrategy = require('passport-http').BasicStrategy;
-var User = require('./model/user');
+var User = require('./model').User;
 
 module.exports = {
   localStrategy: new LocalStrategy(

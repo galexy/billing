@@ -41,13 +41,32 @@ app.get('/user', Authentication.ensureAuthenticated, function(req, res) {
   return res.json(req.session.user);
 });
 
+var Product = require('./model').Product;
+
 app.get('/api/products', Authentication.authenticateApi, function(req, res) {
-  return res.json([
-    {
-      id: 1,
-      name: 'Cuecard Service'
-    }
-  ]);
+  Product.find().lean(true)
+    .exec()
+    .then(function(products) {
+      return res.send(products);
+    })
+    .then(null, function(err) {
+      console.log(err);
+      return res.send(500);
+    });
+});
+
+app.get('/api/products/:productId', Authentication.authenticateApi, function(req, res) {
+  Product
+    .findById(req.params.productId)
+    .lean(true)
+    .exec()
+    .then(function(product) {
+      return res.send(product);
+    })
+    .then(null, function(err) {
+      console.log(err);
+      return res.send(500);
+    });
 });
 
 module.exports = app;

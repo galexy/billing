@@ -2,7 +2,7 @@
 
 angular.module('billingApp')
   .factory('Product', function Product($resource, $q) {
-    var ProductResource = $resource('/api/products/:productId', {productId: '@id'});
+    var ProductResource = $resource('/api/products/:productId', {productId: '@_id'});
 
     return {
       get: function get(filter) {
