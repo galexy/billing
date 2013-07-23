@@ -1,14 +1,6 @@
 <div id="flash" class="alert-box alert" ng-show="flash">{{ flash }}</div>
 
 <div class="hero-unit">
-  Use one of the test users:
-  <ul>
-    <li ng-repeat="user in sampleUsers">
-      <div>Username: {{user.username}}</div>
-      <div>Password: {{user.password}}</div>
-    </li>
-  </ul>
-
   <form ng-submit="login()">
     <div class="control-group">
       <label for="username" class="control-label" >Username:</label>

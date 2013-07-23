@@ -52,6 +52,10 @@ angular.module('billingApp', [])
         templateUrl: 'views/login.html',
         controller: 'LoginCtrl'
       })
+      .when('/plans', {
+        templateUrl: 'views/plans.html',
+        controller: 'PlansCtrl'
+      })
       .otherwise({
         redirectTo: '/login'
       });
