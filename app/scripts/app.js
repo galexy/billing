@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('billingApp', [])
+angular.module('billingApp', ['ngResource'])
   .config(function($httpProvider) {
     var logsOutUserOn401 = function($location, $q, Session) {
       var success = function(response) {
@@ -52,9 +52,9 @@ angular.module('billingApp', [])
         templateUrl: 'views/login.html',
         controller: 'LoginCtrl'
       })
-      .when('/plans', {
-        templateUrl: 'views/plans.html',
-        controller: 'PlansCtrl'
+      .when('/products', {
+        templateUrl: 'views/products.html',
+        controller: 'ProductsCtrl'
       })
       .otherwise({
         redirectTo: '/login'

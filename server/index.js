@@ -37,12 +37,17 @@ passport.deserializeUser(Authentication.deserializeUser);
 app.post('/login', Authentication.login);
 app.get('/logout', Authentication.logout);
 
-app.get('/user', Authentication.ensureAuthenticated, function(req, res, next) {
+app.get('/user', Authentication.ensureAuthenticated, function(req, res) {
   return res.json(req.session.user);
 });
 
-app.get('/api/plans', Authentication.authenticateApi, function(req, res) {
-  return res.json({ok: 'ok'});
+app.get('/api/products', Authentication.authenticateApi, function(req, res) {
+  return res.json([
+    {
+      id: 1,
+      name: 'Cuecard Service'
+    }
+  ]);
 });
 
 module.exports = app;
