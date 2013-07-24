@@ -1,0 +1,60 @@
+<h2>Component Details</h2>
+<h3>{{component.name}}</h3>
+
+<form class="form-horizontal">
+  <div class="control-group">
+    <label class="control-label" for="inputName">Name</label>
+    <div class="controls">
+      <input type="text" id="inputName" placeholder="Component Name" ng-model="component.name"></input>
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputDescription">Description</label>
+    <div class="controls">
+      <textarea rows="3" id="inputDescription" placeholder="Description" ng-model="component.description">
+      </textarea>
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputHandle">Handle</label>
+    <div class="controls">
+      <input type="text" id="inputHandle" placeholder="Handle" ng-model="component.alias"></input>
+    </div>
+  </div>
+
+  <hr />
+
+  <div class="control-group">
+    <label class="control-label" for="inputKind">Kind</label>
+    <div class="controls">
+      <select ng-model="component.kind" ng-options="c for c in componentKinds"></select>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" for="inputUnit">Unit Name</label>
+    <div class="controls">
+      <input type="text" id="inputUnit" placeholder="Unit" ng-model="component.unitName"></input>
+    </div>
+  </div>
+
+</form>
+
+<hr />
+
+<h4>Tiers</h4>
+<div ng-repeat="tier in component.pricing">
+  <form class="form-inline">
+    <label>Starting</label>
+    <input type="number" class="input-small" ng-model="tier.start"></input>
+    <label>Ending</label>
+    <input type="number" class="input-small" ng-model="tier.end"></input>
+    <label>Unit Price</label>
+    <div class="input-prepend">
+      <span class="add-on">$</span>
+      <input type="number" class="input-small" ng-model="tier.unitcost"></input>
+    </div>
+  </form>
+</div>
+<a ng-click="addTier()">+ Add Tier</a>
+
