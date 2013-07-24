@@ -1,10 +1,11 @@
 'use strict';
 
-var express = require('express');
+var _              = require('lodash');
+var express        = require('express');
+var passport       = require('passport');
+var mongoose       = require('mongoose');
 
-var app = express();
-var passport = require('passport');
-
+var app            = express();
 var Authentication = require('./authentication');
 
 app.use(express.logger('dev'));
@@ -68,5 +69,35 @@ app.get('/api/products/:productId', Authentication.authenticateApi, function(req
       return res.send(500);
     });
 });
+
+app.put('/api/products/:productId', Authentication.authenticateApi, function(req, res) {
+  // TODO: validate
+  Product
+    .findById(req.params.productId)
+    .exec()
+    .then(function(product) {
+      console.log(product)
+      console.log(req.body)
+      var p = _.assign(product, req.body);
+      console.log(p)
+      return p;
+    })
+    .then(function(updatedProduct) {
+      var p = new mongoose.Promise();
+      updatedProduct.save(function(err, savedProduct) {
+        if (err) {
+          return p.error(err);
+        }
+        p.complete(savedProduct);
+      });
+      return p;
+    })
+    .then(function(savedProduct) {
+      return res.send(200);
+    }, function(err) {
+      // TODO: handle other errors
+      return res.send(500);
+    });
+})
 
 module.exports = app;

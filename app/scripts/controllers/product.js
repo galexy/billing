@@ -2,5 +2,5 @@
 
 angular.module('billingApp')
   .controller('ProductCtrl', function ($scope, $routeParams, Product) {
-    $scope.product = Product.get($routeParams);
+    $scope.product = Product.get($routeParams); // Handle error?
   });

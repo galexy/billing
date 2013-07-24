@@ -60,6 +60,10 @@ angular.module('billingApp', ['ngResource', 'ui.bootstrap'])
         templateUrl: 'views/product.html',
         controller: 'ProductCtrl'
       })
+      .when('/products/:productId/plans/:planId', {
+        templateUrl: 'views/plan.html',
+        controller: 'PlanCtrl'
+      })
       .otherwise({
         redirectTo: '/login'
       });
