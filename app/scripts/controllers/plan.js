@@ -6,22 +6,12 @@ angular.module('billingApp')
      * Model Data
      */
     $scope.product = Product.get({productId: $routeParams.productId}, function(product) {
-      // it sucks that I can't use a promise or a watch to properly define this dependency
-      $scope.plan = _.find($scope.product.plans, {_id: $routeParams.planId});
-    });
-
-    /*
-     * Watches
-     */
-    $scope.$watch('plan.unitcost', function() {
-      if ($scope.plan) {
-        $scope.unitcostInDollars = $scope.plan.unitcost / 100;
-      }
-    });
-
-    $scope.$watch('unitcostInDollars', function() {
-      if ($scope.plan) {
-        $scope.plan.unitcost = $scope.unitcostInDollars * 100;
+      if ($routeParams.planId === 'new') {
+        $scope.plan = {};
+        $scope.product.plans.push($scope.plan);
+      } else {
+        // it sucks that I can't use a promise or a watch to properly define this dependency
+        $scope.plan = _.find($scope.product.plans, {_id: $routeParams.planId});
       }
     });
 
@@ -38,5 +28,10 @@ angular.module('billingApp')
 
     $scope.cancel = function cancel() {
       $window.history.back();
+    };
+
+    $scope.deletePlan = function deletePlan() {
+      $scope.product.plans = _.without($scope.product.plans, $scope.plan);
+      $scope.save();
     };
   });

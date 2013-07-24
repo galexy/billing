@@ -52,9 +52,15 @@
     <label>Unit Price</label>
     <div class="input-prepend">
       <span class="add-on">$</span>
-      <input type="number" class="input-small" ng-model="tier.unitcost"></input>
+      <input type="number" step="0.01" class="input-small" ng-model="tier.unitcost" money></input>
     </div>
+    <button class="close" ng-hide="$first" ng-click="removeTier($index)">&times;</button>
   </form>
 </div>
 <a ng-click="addTier()">+ Add Tier</a>
+
+<hr />
+
+<a class="btn btn-success" ng-click="save()">Save Changes</a> or <a ng-click="cancel()">Cancel</a>
+<a class="btn btn-danger pull-right" ng-click="deleteComponent()">Delete Component</a>
 
