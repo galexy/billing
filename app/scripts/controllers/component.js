@@ -7,13 +7,15 @@ angular.module('billingApp')
      */
     $scope.componentKinds = ['Metered', 'Seat'];
 
+    $scope.isPlanOverride = !angular.isUndefined($routeParams.planId);
+
     /*
      * Models
      */
     $scope.product = Product.get({productId: $routeParams.productId}, function(product) {
-      var components = angular.isUndefined($routeParams.planId)
-        ? product.components
-        : _.find(product.plans, {_id: $routeParams.planId}).components;
+      var components = $scope.isPlanOverride
+        ? _.find(product.plans, {_id: $routeParams.planId}).components
+        : product.components;
 
       if ($routeParams.componentId === 'new') {
         $scope.component = { pricing: [] };
