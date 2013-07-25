@@ -76,13 +76,7 @@ app.put('/api/products/:productId', Authentication.authenticateApi, function(req
     .findById(req.params.productId)
     .exec()
     .then(function(product) {
-      console.log(product)
-      console.log(req.body)
-      var p = _.assign(product, req.body);
-      console.log(p)
-      return p;
-    })
-    .then(function(updatedProduct) {
+      var updatedProduct = _.assign(product, req.body);
       var p = new mongoose.Promise();
       updatedProduct.save(function(err, savedProduct) {
         if (err) {
@@ -95,6 +89,7 @@ app.put('/api/products/:productId', Authentication.authenticateApi, function(req
     .then(function(savedProduct) {
       return res.send(200);
     }, function(err) {
+      console.log(err);
       // TODO: handle other errors
       return res.send(500);
     });

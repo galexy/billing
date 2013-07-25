@@ -35,7 +35,8 @@ var PlanSchema = new Schema({
   name: {type: String, required: true},
   alias: {type: String, required: true},
   description: String,
-  unitcost: {type: Number, required: true, min: 0}
+  unitcost: {type: Number, required: true, min: 0},
+  components: [ComponentSchema]
 }, {strict: true});
 
 var ProductSchema = new Schema({

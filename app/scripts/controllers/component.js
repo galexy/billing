@@ -11,11 +11,15 @@ angular.module('billingApp')
      * Models
      */
     $scope.product = Product.get({productId: $routeParams.productId}, function(product) {
+      var components = angular.isUndefined($routeParams.planId)
+        ? product.components
+        : _.find(product.plans, {_id: $routeParams.planId}).components;
+
       if ($routeParams.componentId === 'new') {
         $scope.component = { pricing: [] };
-        product.components.push($scope.component);
+        components.push($scope.component);
       } else {
-        $scope.component = _.find(product.components, {_id: $routeParams.componentId});
+        $scope.component = _.find(components, {_id: $routeParams.componentId});
       }
     });
 
@@ -32,7 +36,7 @@ angular.module('billingApp')
 
     $scope.save = function() {
       $scope.product.$save(function() {
-        $location.path('/products/' + $routeParams.productId);
+        $window.history.back();
       }, function() {
         // TODO: come up with a way to handle errors?
       });
