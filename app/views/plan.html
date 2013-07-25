@@ -5,20 +5,20 @@
   <div class="control-group">
     <label class="control-label" for="inputName">Name</label>
     <div class="controls">
-      <input type="text" id="inputName" placeholder="Plan Name" ng-model="plan.name"></input>
+      <input type="text" id="inputName" placeholder="Plan Name" data-ng-model="plan.name"></input>
     </div>
   </div>
   <div class="control-group">
     <label class="control-label" for="inputDescription">Description</label>
     <div class="controls">
-      <textarea rows="3" id="inputDescription" placeholder="Description" ng-model="plan.description">
+      <textarea rows="3" id="inputDescription" placeholder="Description" data-ng-model="plan.description">
       </textarea>
     </div>
   </div>
   <div class="control-group">
     <label class="control-label" for="inputHandle">Handle</label>
     <div class="controls">
-      <input type="text" id="inputHandle" placeholder="Handle" ng-model="plan.alias"></input>
+      <input type="text" id="inputHandle" placeholder="Handle" data-ng-model="plan.alias"></input>
     </div>
   </div>
   <hr />
@@ -28,7 +28,7 @@
     <div class="controls">
       <div class="input-prepend input-append">
         <span class="add-on">$</span>
-        <input type="number" id="inputMonthlyFee" ng-model="plan.unitcost" money></input>
+        <input type="number" id="inputMonthlyFee" data-ng-model="plan.unitcost" money></input>
     </div>
   </div>
   <hr />
@@ -42,12 +42,12 @@
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="component in plan.components">
+      <tr data-ng-repeat="component in plan.components">
         <td><a href="#/products/{{product._id}}/plans/{{plan._id}}/components/{{component._id}}">{{component.name}}</a></td>
         <td>{{component.kind}}</td>
         <td>
           <table>
-            <tr ng-repeat="tier in component.pricing">
+            <tr data-ng-repeat="tier in component.pricing">
               <td>{{tier.start}} - {{tier.end | infinte}} units</td>
               <td>{{tier.unitcost / 100 | currency:"$"}}
             </tr>
@@ -57,10 +57,10 @@
     </tbody>
   </table>
 
-  <a ng-click="addComponent()">+ Add Component Override</a>
+  <a data-ng-click="addComponent()">+ Add Component Override</a>
 </form>
 
 <hr />
 
-<a class="btn btn-success" ng-click="save()">Save Changes</a> or <a ng-click="cancel()">Cancel</a>
-<a class="btn btn-danger pull-right" ng-click="deletePlan()">Delete Plan</a>
+<a class="btn btn-success" data-ng-click="save()">Save Changes</a> or <a data-ng-click="cancel()">Cancel</a>
+<a class="btn btn-danger pull-right" data-ng-click="deletePlan()">Delete Plan</a>
