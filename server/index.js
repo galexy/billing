@@ -42,26 +42,22 @@ app.get('/user', Authentication.ensureAuthenticated, function(req, res) {
   return res.json(req.session.user);
 });
 
-var Product = require('./model').Product;
+var model = require('./model');
 
 app.get('/api/products', Authentication.authenticateApi, function(req, res) {
-  Product.find().lean(true)
-    .exec()
-    .then(function(products) {
-      return res.send(products);
-    })
-    .then(null, function(err) {
+  model.Product.find().lean(true).exec()
+    .then(res.send.bind(res), function(err) {
       console.log(err);
       return res.send(500);
     });
 });
 
 app.get('/api/products/:productId', Authentication.authenticateApi, function(req, res) {
-  Product
-    .findById(req.params.productId)
-    .lean(true)
-    .exec()
+  model.Product.findById(req.params.productId).lean(true).exec()
     .then(function(product) {
+      if (product == null) {
+        return res.send(400);
+      }
       return res.send(product);
     })
     .then(null, function(err) {
@@ -71,10 +67,8 @@ app.get('/api/products/:productId', Authentication.authenticateApi, function(req
 });
 
 app.put('/api/products/:productId', Authentication.authenticateApi, function(req, res) {
-  // TODO: validate
-  Product
-    .findById(req.params.productId)
-    .exec()
+  // TODO: understand if _.assign destroys mongoose object and therefore preventing validation
+  model.Product.findById(req.params.productId).exec()
     .then(function(product) {
       var updatedProduct = _.assign(product, req.body);
       var p = new mongoose.Promise();
@@ -86,13 +80,76 @@ app.put('/api/products/:productId', Authentication.authenticateApi, function(req
       });
       return p;
     })
-    .then(function(savedProduct) {
-      return res.send(200);
-    }, function(err) {
+    .then(res.send.bind(res, 200), function(err) {
       console.log(err);
-      // TODO: handle other errors
       return res.send(500);
     });
-})
+});
+
+app.get('/api/subscribers', Authentication.authenticateApi, function(req, res) {
+  model.Subscriber.find().populate('statements').lean(true).exec()
+    .then(res.send.bind(res), function(err) {
+      console.log(err);
+      return res.send(500);
+    });
+});
+
+app.post('/api/subscribers', Authentication.authenticateApi, function(req, res) {
+  var p = new mongoose.Promise();
+  model.Subscriber.findOrCreate(req.body, function(err, subscriber) {
+    if (err) {
+      return p.error(err);
+    }
+    p.complete(subscriber);
+  });
+
+  p.then(res.send.bind(res), function(err) {
+    console.log(err);
+    return res.send(500);
+  });
+});
+
+app.get('/api/subscribers/:subscriberId', Authentication.authenticateApi, function(req, res) {
+  model.Subscriber.findById(req.params.subscriberId).populate('statements').lean(true).exec()
+    .then(res.send.bind(res), function(err) {
+      console.log(err);
+      return res.send(500);
+    });
+});
+
+app.put('/api/subscribers/:subscriberId', Authentication.authenticateApi, function(req, res) {
+  model.Subscriber.findById(req.params.subscriberId).exec()
+    .then(function(subscriber) {
+      var updatedSubscriber = _.assign(subscriber, req.body);
+      var p = new mongoose.Promise();
+      updatedSubscriber.save(function(err, savedSubscriber) {
+        if (err) {
+          return p.error(err);
+        }
+        return p.complete(savedSubscriber);
+      });
+      return p;
+    })
+    .then(res.send.bind(res), function(err) {
+      console.log(err);
+      res.send(500);
+    });
+});
+
+app.del('/api/subscribers/:subscriberId', Authentication.authenticateApi, function(req, res) {
+  var p = new mongoose.Promise();
+  model.Subscriber.remove({_id: req.params.subscriberId}, function(err) {
+    if (err) {
+      return p.error(err);
+    }
+
+    return p.complete();
+  });
+
+  p.then(res.send.bind(res, 200), function(err) {
+    console.log(err);
+    res.send(500);
+  });
+});
 
 module.exports = app;

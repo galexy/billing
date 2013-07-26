@@ -45,6 +45,9 @@ angular.module('billingApp', ['ngResource', 'ui.bootstrap'])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {
+        redirectTo: '/dashboard'
+      })
+      .when('/dashboard', {
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
@@ -71,6 +74,18 @@ angular.module('billingApp', ['ngResource', 'ui.bootstrap'])
       .when('/products/:productId/plans/:planId/components/:componentId', {
         templateUrl: 'views/component.html',
         controller: 'ComponentCtrl'
+      })
+      .when('/subscribers', {
+        templateUrl: 'views/subscribers.html',
+        controller: 'SubscribersCtrl'
+      })
+      .when('/subscribers/new', {
+        templateUrl: 'views/subscriber.html',
+        controller: 'SubscriberCtrl'
+      })
+      .when('/subscribers/:subscriberId', {
+        templateUrl: 'views/subscriber.html',
+        controller: 'SubscriberCtrl'
       })
       .otherwise({
         redirectTo: '/login'

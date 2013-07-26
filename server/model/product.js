@@ -4,9 +4,6 @@ var _        = require('lodash');
 var mongoose = require('mongoose');
 var Schema   = mongoose.Schema;
 
-// TODO: move to configuration
-var conn = mongoose.createConnection('mongodb://localhost/billing');
-
 var PricingTierSchema = new Schema({
   start: {type: Number, required: true},
   end: {type: Number},
@@ -45,4 +42,4 @@ var ProductSchema = new Schema({
   components: [ComponentSchema]
 }, {strict: true});
 
-module.exports = conn.model('Product', ProductSchema);
+module.exports = mongoose.model('Product', ProductSchema);
