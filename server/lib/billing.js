@@ -70,7 +70,11 @@ function findAllSubscribers() {
 
 function findSubscriberById(id) {
   return promise(function(r) {
-    model.Subscriber.findById(id).lean(true).exec(r);
+    model.Subscriber
+      .findById(id)
+      .lean(true)
+      .populate('statements subscriptions.product')
+      .exec(r);
   });
 }
 
@@ -117,6 +121,32 @@ function addCardForSubscriber(subscriberId, cardToken) {
   });
 }
 
+function addSubscriptionForSubscriber(subscriberId, productAlias, planAlias) {
+  return when.join(promise(function(r) {
+    model.Subscriber.findById(subscriberId, r);
+  }),
+  promise(function(r) {
+    model.Product.findOne({alias: productAlias}, r);
+  }))
+  .then(function(values) {
+    var subscriber = values[0];
+    var product = values[1];
+
+    subscriber.subscriptions.push({
+      product: product,
+      plan: planAlias,
+      startDate: Date.today(),
+      status: 'Active'
+    });
+
+    return promise(function(r) {
+      subscriber.save(function(err, subscriber) {
+        r(err, subscriber);
+      });
+    });
+  });
+}
+
 module.exports = {
   products: {
     findAll: findAllProducts,
@@ -132,6 +162,7 @@ module.exports = {
     findAll: findAllSubscribers,
     findById: findSubscriberById,
     create: createSubscriber,
-    addCard: addCardForSubscriber
+    addCard: addCardForSubscriber,
+    addSubscription: addSubscriptionForSubscriber
   }
 };

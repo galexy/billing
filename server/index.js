@@ -97,11 +97,9 @@ app.post('/api/subscribers', Authentication.authenticateApi, function(req, res) 
 });
 
 app.get('/api/subscribers/:subscriberId', Authentication.authenticateApi, function(req, res) {
-  model.Subscriber.findById(req.params.subscriberId).populate('statements').lean(true).exec()
-    .then(res.send.bind(res), function(err) {
-      console.log(err);
-      return res.send(500);
-    });
+  billing.subscribers
+    .findById(req.params.subscriberId)
+    .then(sendRes.bind(res), sendError.bind(res));
 });
 
 app.put('/api/subscribers/:subscriberId', Authentication.authenticateApi, function(req, res) {
@@ -141,6 +139,11 @@ app.del('/api/subscribers/:subscriberId', Authentication.authenticateApi, functi
 
 app.post('/api/subscribers/:subscriberId/addCard', Authentication.authenticateApi, function(req, res) {
   billing.subscribers.addCard(req.params.subscriberId, req.query.token)
+    .then(sendRes.bind(res), sendError.bind(res));
+});
+
+app.post('/api/subscribers/:subscriberId/addSubscription', Authentication.authenticateApi, function(req, res) {
+  billing.subscribers.addSubscription(req.params.subscriberId, req.query.product, req.query.plan)
     .then(sendRes.bind(res), sendError.bind(res));
 });
 

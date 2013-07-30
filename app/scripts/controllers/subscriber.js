@@ -51,4 +51,26 @@ angular.module('billingApp')
         });
       });
     };
+
+    $scope.addSubscription = function() {
+      var d = $dialog.dialog({
+        backdrop: true,
+        keyboard: true,
+        backdropClick: false,
+        dialogFade: true,
+        templateUrl: 'views/subscriptiondialog.html',
+        controller: 'SubscriptionDialogCtrl'
+      });
+
+      d.open().then(function(product) {
+        $scope.subscriber.$addSubscription({
+          product: product.product.alias,
+          plan: product.plan.alias
+        }, function() {
+          console.log('looky');
+        }, function(err) {
+          console.log(err);
+        });
+      });
+    };
   });
