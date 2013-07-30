@@ -59,6 +59,10 @@ angular.module('billingApp')
 
     $scope.deletePlan = function deletePlan() {
       $scope.product.plans = _.without($scope.product.plans, $scope.plan);
-      $scope.product.save();
+      $scope.product.$save(function() {
+        $location.path('/products/' + $routeParams.productId);
+      }, function() {
+        // TODO: handle error
+      });
     };
   });

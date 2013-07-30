@@ -26,6 +26,7 @@ var SubscriberSchema = new Schema({
   contactFirstName: {type: String, required: true},
   contactLastName: {type: String, required: true},
   status: {type: String, required: true},
+  startDate: {type: Date, required: true, default: Date.today},
   subscriptions: [Subscription],
   nextProcessingDate: {type: Date, required: true, default: beginningNextMonth},
   stripeCustomerId: String,

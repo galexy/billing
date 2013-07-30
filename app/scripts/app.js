@@ -42,6 +42,9 @@ angular.module('billingApp', ['ngResource', 'ui.bootstrap'])
       }
     });
   })
+  .run(function($window) {
+    $window.Stripe.setPublishableKey('pk_test_kN2L3DR9qFOegK9KRHmd9v0K'); // TODO: figure out how to not hardcode this
+  })
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {

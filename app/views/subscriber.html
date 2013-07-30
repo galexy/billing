@@ -54,9 +54,32 @@
     </div>
   </div>
   <div data-ng-hide="isNew">
-    <legend>Credit Card<button class="btn btn-primary pull-right">Add Card</button></legend>
+    <legend>Credit Card<button class="btn btn-primary pull-right" data-ng-click="addCreditCard()">Add Card</button></legend>
     <div class="control-group">
-
+      <label class="control-label">Stripe Id</label>
+      <div class="controls">
+        <input type="text" ng-model="subscriber.stripeCustomerId" disabled></input>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">Type</label>
+      <div class="controls">
+        <input type="text" value="{{subscriber.activeCard.type}}" disabled></input>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">Card Number</label>
+      <div class="controls">
+        <input type="text" value="{{subscriber.activeCard.last4 | prepend:'xxxx xxxx xxxx '}}" disabled></input>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">Expiration</label>
+      <div class="controls">
+        <input type="text" class="input-small" value="{{subscriber.activeCard.exp_month}}" disabled></input>
+        <span> / </span>
+        <input type="text" class="input-small" value="{{subscriber.activeCard.exp_year}}" disabled></input>
+      </div>
     </div>
 
     <legend>Subscriptions<button class="btn btn-primary pull-right">Add Subscription</button></legend>
@@ -89,16 +112,18 @@
           <th>Status</th>
           <th>Paid On</th>
           <th>Payment</th>
-          <th>Balance</th>
+          <th>Opening Balance</th>
+          <th>Balance Due</th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="statement in subscriber.statements">
-          <td>{{statement.startDate | date:'mediumDate'}} - {{statement.endDate | date:'mediumDate'}}</td>
+          <td><a href="/subscribers/{{subscriber._id}}/statements/{{statement._id}}">{{statement.startDate | date:'mediumDate'}} - {{statement.endDate | date:'mediumDate'}}</a></td>
           <td>{{statement.status}}</td>
           <td>Huh?</td>
           <td>Huh?</td>
-          <td>{{statement.balance}}</td>
+          <td>{{statement.openingBalance | currency:'$'}}</td>
+          <td>{{statement.balanceDue | currency:'$'}}</td>
         </tr>
       </tbody>
     </table>

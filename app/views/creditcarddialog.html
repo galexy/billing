@@ -1,0 +1,35 @@
+<div class="modal-header">
+  <h3>Add credit card</h3>
+</div>
+<div class="modal-body">
+  <span class="payment-errors"></span>
+
+  <form id="creditCardForm" class="form-horizontal">
+    <div class="control-group">
+      <label class="control-label" for="inputCardNumber">Card Number</label>
+      <div class="controls">
+        <input type="text" size="20" data-stripe="number"/>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="inputCardNumber">CVC</label>
+      <div class="controls">
+        <input type="text" size="4" data-stripe="cvc"/>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="inputCardNumber">Expiration</label>
+      <div class="controls">
+        <input type="text" size="2" class="input-small" data-stripe="exp-month" placeholder="MM"/>
+        <span> / </span>
+        <input type="text" size="4" class="input-small" data-stripe="exp-year" placeholder="YYYY"/>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button data-ng-click="cancel()" class="btn">Cancel</button>
+  <button data-ng-click="addCard()" class="btn btn-primary">OK</button>
+</div>

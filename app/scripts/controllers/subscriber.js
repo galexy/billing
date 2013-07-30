@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('billingApp')
-  .controller('SubscriberCtrl', function ($scope, $routeParams, $window, Subscriber) {
+  .controller('SubscriberCtrl', function ($scope, $routeParams, $window, $dialog, Subscriber) {
     /*
      * Model
      */
@@ -31,5 +31,24 @@ angular.module('billingApp')
       $scope.subscriber.$delete(function() {
         $window.history.back();
       });
-    }
+    };
+
+    $scope.addCreditCard = function() {
+      var d = $dialog.dialog({
+        backdrop: true,
+        keyboard: true,
+        backdropClick: false,
+        dialogFade: true,
+        templateUrl: 'views/creditcarddialog.html',
+        controller: 'CreditCardDialogCtrl'
+      });
+
+      d.open().then(function(token) {
+        $scope.subscriber.$addCard({token: token}, function() {
+          console.log('looky');
+        }, function(err) {
+          console.log(err);
+        });
+      });
+    };
   });

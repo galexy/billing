@@ -42,71 +42,58 @@ app.get('/user', Authentication.ensureAuthenticated, function(req, res) {
   return res.json(req.session.user);
 });
 
-var model = require('./model');
+var model   = require('./model');
+var billing = require('./lib/billing');
+
+function sendRes(obj) {
+  return (null == obj)
+    ? this.send(400)
+    : this.send(obj);
+}
+
+function sendSuccess() {
+  this.send(200);
+}
+
+function sendError(err) {
+  console.log(err);
+  console.log(err.stack);
+  // TODO: base status on error type/information
+  return this.send(500);
+}
 
 app.get('/api/products', Authentication.authenticateApi, function(req, res) {
-  model.Product.find().lean(true).exec()
-    .then(res.send.bind(res), function(err) {
-      console.log(err);
-      return res.send(500);
-    });
+  billing.products
+    .findAll()
+    .then(sendRes.bind(res), sendError.bind(res));
 });
 
 app.get('/api/products/:productId', Authentication.authenticateApi, function(req, res) {
-  model.Product.findById(req.params.productId).lean(true).exec()
-    .then(function(product) {
-      if (product == null) {
-        return res.send(400);
-      }
-      return res.send(product);
-    })
-    .then(null, function(err) {
-      console.log(err);
-      return res.send(500);
-    });
+  billing.products
+    .findById(req.params.productId)
+    .then(sendRes.bind(res), sendError.bind(res));
 });
 
 app.put('/api/products/:productId', Authentication.authenticateApi, function(req, res) {
-  // TODO: understand if _.assign destroys mongoose object and therefore preventing validation
-  model.Product.findById(req.params.productId).exec()
-    .then(function(product) {
-      var updatedProduct = _.assign(product, req.body);
-      var p = new mongoose.Promise();
-      updatedProduct.save(function(err, savedProduct) {
-        if (err) {
-          return p.error(err);
-        }
-        p.complete(savedProduct);
-      });
-      return p;
-    })
-    .then(res.send.bind(res, 200), function(err) {
-      console.log(err);
-      return res.send(500);
-    });
+  if (req.body._id != req.params.productId) {
+    return res.send(400); // TODO: send error type/code
+  }
+
+  billing.products
+    .update(req.body)
+    .then(sendSuccess.bind(res), sendError.bind(res));
 });
 
 app.get('/api/subscribers', Authentication.authenticateApi, function(req, res) {
-  model.Subscriber.find().populate('statements').lean(true).exec()
-    .then(res.send.bind(res), function(err) {
-      console.log(err);
-      return res.send(500);
-    });
+  billing.subscribers
+    .findAll()
+    .then(sendRes.bind(res), sendError.bind(res));
 });
 
 app.post('/api/subscribers', Authentication.authenticateApi, function(req, res) {
-  var p = new mongoose.Promise();
-  model.Subscriber.findOrCreate(req.body, function(err, subscriber) {
-    if (err) {
-      return p.error(err);
-    }
-    p.complete(subscriber);
-  });
-
-  p.then(res.send.bind(res), function(err) {
-    console.log(err);
-    return res.send(500);
-  });
+  billing.subscribers
+    .create(req.body)
+    .then(sendRes.bind(res), sendError.bind(res));
 });
 
 app.get('/api/subscribers/:subscriberId', Authentication.authenticateApi, function(req, res) {
@@ -150,6 +137,11 @@ app.del('/api/subscribers/:subscriberId', Authentication.authenticateApi, functi
     console.log(err);
     res.send(500);
   });
+});
+
+app.post('/api/subscribers/:subscriberId/addCard', Authentication.authenticateApi, function(req, res) {
+  billing.subscribers.addCard(req.params.subscriberId, req.query.token)
+    .then(sendRes.bind(res), sendError.bind(res));
 });
 
 module.exports = app;
