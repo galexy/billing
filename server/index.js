@@ -143,7 +143,7 @@ app.post('/api/subscribers/:subscriberId/addCard', Authentication.authenticateAp
 });
 
 app.post('/api/subscribers/:subscriberId/addSubscription', Authentication.authenticateApi, function(req, res) {
-  billing.subscribers.addSubscription(req.params.subscriberId, req.query.product, req.query.plan)
+  billing.subscribers.addSubscription(req.params.subscriberId, req.query.product, req.query.plan, req.query.startDate)
     .then(sendRes.bind(res), sendError.bind(res));
 });
 

@@ -121,7 +121,7 @@ function addCardForSubscriber(subscriberId, cardToken) {
   });
 }
 
-function addSubscriptionForSubscriber(subscriberId, productAlias, planAlias) {
+function addSubscriptionForSubscriber(subscriberId, productAlias, planAlias, startDate) {
   return when.join(promise(function(r) {
     model.Subscriber.findById(subscriberId, r);
   }),
@@ -135,7 +135,7 @@ function addSubscriptionForSubscriber(subscriberId, productAlias, planAlias) {
     subscriber.subscriptions.push({
       product: product,
       plan: planAlias,
-      startDate: Date.today(),
+      startDate: startDate || Date.today(),
       status: 'Active'
     });
 

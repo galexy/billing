@@ -16,6 +16,13 @@
         <select data-ng-model="plan" data-ng-options="p.name for p in product.plans"></select>
       </div>
     </div>
+
+    <div class="control-group">
+      <label class="control-label" for="inputStartDate">Start Date</label>
+      <div class="controls">
+        <input type="text" data-ng-model="startDate" data-dateinput></input>
+      </div>
+    </div>
   </form>
 </div>
 <div class="modal-footer">

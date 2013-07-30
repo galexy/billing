@@ -9,6 +9,6 @@ angular.module('billingApp')
     };
 
     $scope.addSubscription = function() {
-      dialog.close({product: $scope.product, plan: $scope.plan});
+      dialog.close(_.pick($scope, 'product', 'plan', 'startDate'));
     };
   });

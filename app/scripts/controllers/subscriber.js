@@ -62,10 +62,11 @@ angular.module('billingApp')
         controller: 'SubscriptionDialogCtrl'
       });
 
-      d.open().then(function(product) {
+      d.open().then(function(subscription) {
         $scope.subscriber.$addSubscription({
-          product: product.product.alias,
-          plan: product.plan.alias
+          product: subscription.product.alias,
+          plan: subscription.plan.alias,
+          startDate: subscription.startDate
         }, function() {
           console.log('looky');
         }, function(err) {

@@ -27,6 +27,15 @@
       </select>
     </div>
   </div>
+  <div class="control-group">
+    <label class="control-label">Start Date</label>
+    <div class="controls">
+      <input type="text"
+        data-ng-model="subscriber.startDate"
+        data-ng-disabled="!isNew"
+        dateinput></input>
+    </div>
+  </div>
   <legend>Contact Information</legend>
   <div class="control-group">
     <label class="control-label">First Name</label>
