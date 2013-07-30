@@ -19,7 +19,7 @@ function findAllProducts() {
   });
 }
 
-function finaProductById(id) {
+function findProductById(id) {
   return promise(function(r) {
     model.Product.findById(id).lean(true).exec(r);
   });
@@ -73,7 +73,7 @@ function findSubscriberById(id) {
     model.Subscriber
       .findById(id)
       .lean(true)
-      .populate('statements subscriptions.product')
+      .populate('statements subscriptions.product subscriptions.usages')
       .exec(r);
   });
 }
@@ -147,10 +147,103 @@ function addSubscriptionForSubscriber(subscriberId, productAlias, planAlias, sta
   });
 }
 
+function findSubscriberWithProducts(subscriberAlias) {
+  return promise(function(r) {
+    model.Subscriber
+      .findOne({accountAlias: subscriberAlias})
+      .populate('subscriptions.product')
+      .exec(r);
+  });
+}
+
+function changeSeats(subscriberAlias, productAlias, seatAlias, delta, memo) {
+  var subscriber = null;
+  var subscription = null;
+  var component = null;
+
+  // NOTE: assume product is only subscribed once...
+  return findSubscriberWithProducts(subscriberAlias)
+    .then(function(savedSubscriber) {
+      // TODO: handle missing subscriber, subscription or component
+      subscriber = savedSubscriber;
+      subscription = _.find(subscriber.subscriptions, function(subscription) {
+        return subscription.product.alias == productAlias;
+      });
+      component = _.find(subscription.product.components, {kind: 'Seat', alias: seatAlias});
+    })
+    .then(function() {
+      return promise(function(r) {
+        model.Usage
+          .find({subscription: subscription.id, component: component.id})
+          .sort('-timestamp')
+          .limit(1)
+          .exec(r);
+      });
+    })
+    .then(function(lastUsages) {
+      var prevQuantity = null != lastUsages[0] ? lastUsages[0].quantity.valueOf() : 0;
+      console.log('prevQuantity =', prevQuantity)
+
+      return promise(function(r) {
+        model.Usage.create({
+          subscription: subscription.id,
+          component: component.id,
+          kind: 'Seat',
+          name: component.name,
+          quantity: prevQuantity + delta,
+          memo: memo
+        }, r);
+      });
+    })
+    .then(function(usage) {
+      return promise(function(r) {
+        subscription.usages.push(usage);
+        subscriber.save(function(err, subscriber) {
+          r(err, subscriber);
+        });
+      });
+    });
+}
+
+function recordMeterReading(subscriberAlias, productAlias, meterAlias, value, memo) {
+  var subscriber = null;
+  var subscription = null;
+  var component = null;
+
+  return findSubscriberWithProducts(subscriberAlias)
+    .then(function(savedSubscriber) {
+      subscriber = savedSubscriber;
+      subscription = _.find(subscriber.subscriptions, function(subscription) {
+        return subscription.product.alias == productAlias;
+      });
+      component = _.find(subscription.product.components, {kind:'Metered', alias: meterAlias});
+    })
+    .then(function() {
+      return promise(function(r) {
+        model.Usage.create({
+          subscription: subscription.id,
+          component: component.id,
+          kind: 'Metered',
+          name: component.name,
+          quantity: value,
+          memo: memo
+        }, r);
+      });
+    })
+    .then(function(usage) {
+      return promise(function(r) {
+        subscription.usages.push(usage);
+        subscriber.save(function(err, subscriber) {
+          r(err, subscriber);
+        });
+      });
+    });
+}
+
 module.exports = {
   products: {
     findAll: findAllProducts,
-    findById: finaProductById,
+    findById: findProductById,
     update: updateProduct
   },
 
@@ -163,6 +256,8 @@ module.exports = {
     findById: findSubscriberById,
     create: createSubscriber,
     addCard: addCardForSubscriber,
-    addSubscription: addSubscriptionForSubscriber
+    addSubscription: addSubscriptionForSubscriber,
+    changeSeats: changeSeats,
+    recordMeterReading: recordMeterReading
   }
 };

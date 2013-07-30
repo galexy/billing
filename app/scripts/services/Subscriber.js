@@ -2,7 +2,7 @@
 
 angular.module('billingApp')
   .factory('Subscriber', function Subscriber($resource) {
-    return $resource('/api/subscribers/:subscriberId/:cmd',
+    return $resource('/ajax/subscribers/:subscriberId/:cmd',
       {subscriberId: '@_id'},
       {
         save: {method: 'PUT'},

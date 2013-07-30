@@ -12,21 +12,11 @@ var PricingTierSchema = new Schema({
 
 var ComponentSchema = new Schema({
   name: {type: String, required: true},
+  alias: {type: String, required: true},
   active: {type: Boolean, required: true, default: true},
   kind: {type: String, enum: ['Seat', 'Metered']},
   pricing: [PricingTierSchema]
 }, {strict: true});
-
-ComponentSchema.methods.computeUnitCost = function(quantity) {
-  var tier = _(this.pricing)
-    .sortBy('start')
-    .where(function(price) {
-      return price.start <= quantity;
-    })
-    .first();
-
-  return tier.unitcost;
-};
 
 var PlanSchema = new Schema({
   name: {type: String, required: true},

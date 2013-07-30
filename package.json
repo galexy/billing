@@ -2,6 +2,7 @@
   "name": "billing",
   "version": "0.0.1",
   "dependencies": {
+    "uid2": "~0.0.2",
     "express": "~3.3.4",
     "passport": "~0.1.17",
     "passport-local": "~0.1.6",

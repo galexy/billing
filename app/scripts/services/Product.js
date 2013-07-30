@@ -2,7 +2,7 @@
 
 angular.module('billingApp')
   .factory('Product', function Product($resource) {
-    return $resource('/api/products/:productId',
+    return $resource('/ajax/products/:productId',
       {productId: '@_id'},
       {save: {method: 'PUT'}});
   });

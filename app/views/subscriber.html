@@ -104,7 +104,7 @@
       </thead>
       <tbody>
         <tr ng-repeat="subscription in subscriber.subscriptions">
-          <td>{{subscription.product.name}}</td>
+          <td><a href="#/subscribers/{{subscriber._id}}/subscriptions/{{subscription._id}}">{{subscription.product.name}}</a></td>
           <td>{{subscription.plan}}</td>
           <td>{{subscription.status}}</td>
           <td>{{subscription.startDate | date:'mediumDate'}}</td>

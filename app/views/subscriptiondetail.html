@@ -1,0 +1,25 @@
+<h3>{{subscription.product.name}} - {{subscription.plan}}</h3>
+
+<form class="form-horizontal">
+  <legend>Usage History<button class="btn pull-right" data-ng-click="addUsage()">Add Usage</button></legend>
+  <table class="table table-condensed table-striped table-hover">
+    <thead>
+      <tr>
+        <th>Date/Time</th>
+        <th>Component</th>
+        <th>Kind</th>
+        <th>Quantity</th>
+        <th>Memo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-ng-repeat="usage in subscription.usages | orderBy:'-timestamp'">
+        <td>{{usage.timestamp | date:'short'}}</td>
+        <td>{{usage.name}}</td>
+        <td>{{usage.kind}}</td>
+        <td>{{usage.quantity}}</td>
+        <td>{{usage.memo}}</td>
+      </tr>
+    </tbody>
+  </table>
+</form>
