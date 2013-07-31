@@ -6,14 +6,13 @@
   <div class="span4">
     <h5>Account Information</h5>
     <address>
-      <strong>{{subscriber.contactFirstName}} {{subscriber.contactLastName}}</strong><br>
-      <a href="mailto:{{subscriber.email}}">{{subscriber.email}}</a>
+      <strong>{{statement.contact.name}}</strong><br>
+      <a href="mailto:{{subscriber.email}}">{{statement.contact.email}}</a>
     </address>
     <address>
       <strong>Billing Address</strong><br>
-      {{subscriber.streetAddress1}}<br>
-      {{subscriber.city}}, {{subscriber.state}} {{subscriber.zipcode}}<br>
-      <abbr title="Phone">P:</abbr> ({{subscriber.phone.areacode}}) {{subscriber.phone.number}}
+      {{statement.billing.streetAddress1}}<br>
+      {{statement.billing.city}}, {{statement.billing.state}} {{statement.billing.zip}}<br>
     </address>
   </div>
   <div class="span5">

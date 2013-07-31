@@ -109,8 +109,29 @@ function addCardForSubscriber(subscriberAlias, cardToken) {
     return stripeClient.customers.update(subscriber.stripeCustomerId, {card: cardToken});
   })
   .then(function(stripeCustomer) {
-    subscriber.activeCard = _.pick(stripeCustomer.active_card, 'exp_month', 'exp_year', 'name', 'fingerprint', 'last4', 'type');
     return promise(function(r) {
+      subscriber.activeCard = _.pick(stripeCustomer.active_card,
+        'exp_month',
+        'exp_year',
+        'name',
+        'fingerprint',
+        'last4',
+        'country',
+        'address_line1',
+        'address_line2',
+        'address_city',
+        'address_state',
+        'address_zip',
+        'address_country',
+        'type');
+
+      subscriber.billing = {
+        streetAddress1: subscriber.activeCard.address_line1,
+        city: subscriber.activeCard.address_city,
+        state: subscriber.activeCard.address_state,
+        zipcode: subscriber.activeCard.address_zip
+      };
+
       subscriber.save(function(err, subscriber) {
         r(err, subscriber);
       });
@@ -398,7 +419,7 @@ function chargeCustomer(subscriber, statement, closingDate) {
   });
 }
 
-function reallyCloseStatement(statement) {
+function reallyCloseStatement(statement, subscriber) {
   return promise(function(r) {
     statement.currentCharges = _.reduce(statement.charges, function(currentCharges, charge) {
       var total = charge.total ? charge.total : charge.quantity * charge.unit;
@@ -410,6 +431,17 @@ function reallyCloseStatement(statement) {
       var paymentAmount = payment.success ? payment.amount : 0;
       return currentPayments + paymentAmount;
     }, 0.0);
+
+    console.log(subscriber.contactFirstName)
+    console.log(subscriber.contactLastName)
+    var contactName = (subscriber.contactFirstName || '') + ' ' + (subscriber.contactLastName || '');
+
+    statement.contact = {
+      name: contactName,
+      email: subscriber.email
+    };
+
+    statement.billing = _.pick(subscriber.billing, 'streetAddress1', 'city', 'state', 'zip');
 
     statement.status = 'Closed';
     statement.save(function(err, statement) {
@@ -453,7 +485,9 @@ function closeStatement(subscriberAlias, closingDate) {
   .then(function charge(statement) {
     return chargeCustomer(subscriber, statement, closingDate);
   })
-  .then(reallyCloseStatement)
+  .then(function reallyClose(statement) {
+    return reallyCloseStatement(statement, subscriber);
+  })
   .then(function(closedStatement) {
     return createNextStatement(subscriber, closingDate.clone().addDays(1), closedStatement.balanceDue);
   });

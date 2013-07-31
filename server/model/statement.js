@@ -36,7 +36,17 @@ var StatementSchema = new Schema({
   currentPayments: Number,
   paymentDate: Date,
   charges: [ChargeSchema],
-  payments: [PaymentSchema]
+  payments: [PaymentSchema],
+  contact: {
+    name: String,
+    email: String
+  },
+  billing: {
+    streetAddress1: String,
+    city: String,
+    state: String,
+    zip: String
+  }
 }, {strict: true});
 
 StatementSchema.methods.collateCharges = function(subscriber, callback) {

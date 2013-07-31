@@ -36,7 +36,19 @@ var SubscriberSchema = new Schema({
     fingerprint: String,
     last4: String,
     type: {type: String},
-    name: String
+    name: String,
+    address_line1: String,
+    address_line2: String,
+    address_city: String,
+    address_state: String,
+    address_zip: String,
+    address_country: String
+  },
+  billing: {
+    streetAddress1: String,
+    city: String,
+    state: String,
+    zipcode: String
   },
   statements: [{type: Schema.Types.ObjectId, ref: 'Statement'}]
 }, {strict: true});
