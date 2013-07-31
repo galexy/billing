@@ -5,6 +5,7 @@ var express  = require('express');
 var model    = require('./model');
 var billing  = require('./lib/billing');
 var mongoose = require('mongoose');
+var mongodb  = require('mongodb');
 
 function sendRes(obj) {
   return (null == obj)
@@ -16,11 +17,22 @@ function sendSuccess() {
   this.send(200);
 }
 
+function sendCreated() {
+  this.send(201);
+}
+
 function sendError(err) {
-  console.log(err);
-  console.log(err.stack);
-  // TODO: base status on error type/information
-  return this.send(500);
+  if (err instanceof billing.NotFoundError) {
+    return this.send(404, err.message);
+  } else if (err instanceof billing.InvalidRequestError) {
+    return this.send(400, err.message);
+  } else if (err.name == 'MongoError' && err.code == 11000) {
+    return this.send(400, 'Duplicate Error');
+  } else {
+    console.error(err);
+    console.error(err.stack);
+    return this.send(500);
+  }
 }
 
 var api = express();
@@ -56,7 +68,7 @@ api.get('/subscribers', function(req, res) {
 api.post('/subscribers', function(req, res) {
   billing.subscribers
     .create(req.body)
-    .then(sendRes.bind(res), sendError.bind(res));
+    .then(sendCreated.bind(res), sendError.bind(res));
 });
 
 api.get('/subscribers/:subscriberAlias', function(req, res) {
@@ -66,38 +78,9 @@ api.get('/subscribers/:subscriberAlias', function(req, res) {
 });
 
 api.put('/subscribers/:subscriberAlias', function(req, res) {
-  model.Subscriber.findOne({accountAlias: req.params.subscriberAlias}).exec()
-    .then(function(subscriber) {
-      var updatedSubscriber = _.assign(subscriber, req.body);
-      var p = new mongoose.Promise();
-      updatedSubscriber.save(function(err, savedSubscriber) {
-        if (err) {
-          return p.error(err);
-        }
-        return p.complete(savedSubscriber);
-      });
-      return p;
-    })
-    .then(res.send.bind(res), function(err) {
-      console.log(err);
-      res.send(500);
-    });
-});
-
-api.del('/subscribers/:subscriberAlias', function(req, res) {
-  var p = new mongoose.Promise();
-  model.Subscriber.remove({accountAlias: req.params.subscriberAlias}, function(err) {
-    if (err) {
-      return p.error(err);
-    }
-
-    return p.complete();
-  });
-
-  p.then(res.send.bind(res, 200), function(err) {
-    console.log(err);
-    res.send(500);
-  });
+  billing.subscribers
+    .update(req.params.subscriberAlias, req.body)
+    .then(sendRes.bind(res), sendError.bind(res));
 });
 
 api.post('/subscribers/:subscriberAlias/addCard', function(req, res) {

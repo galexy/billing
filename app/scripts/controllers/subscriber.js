@@ -13,10 +13,10 @@ angular.module('billingApp')
      * Event handlers
      */
     $scope.save = function() {
-      var updater = ($scope.isNew) ? Subscriber.create.bind(Subscriber, {})
+      var updater = ($scope.isNew) ? Subscriber.create.bind(Subscriber, $scope.subscriber)
                                    : $scope.subscriber.$save.bind($scope.subscriber);
 
-      updater($scope.subscriber, function() {
+      updater(function() {
         $window.history.back();
       }, function(err) {
         // TOOD: handle error
@@ -25,12 +25,6 @@ angular.module('billingApp')
 
     $scope.cancel = function() {
       $window.history.back();
-    };
-
-    $scope.deleteSubscriber = function() {
-      $scope.subscriber.$delete(function() {
-        $window.history.back();
-      });
     };
 
     $scope.addCreditCard = function() {

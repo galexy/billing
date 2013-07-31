@@ -9,10 +9,43 @@ var stripe       = require('./stripe');
 var stripeClient = stripe.client(process.env.STRIPE_APIKEY);
 var ObjectID = require('mongodb').ObjectID;
 
+function BillingError(message, error, constr) {
+  Error.captureStackTrace(this, constr || this);
+
+  this.message = message || '';
+  if (error != null) {
+    this.error = error;
+  }
+}
+
+function InternalError(message, error) {
+  InternalError.super_.call(this, message, error, this.constructor);
+}
+
+function InvalidRequestError(message, status, error) {
+  InvalidRequestError.super_.call(this, message, error, this.constructor);
+}
+
+function NotFoundError(message, status, error) {
+  NotFoundError.super_.call(this, message, error, this.constructor);
+}
+
+util.inherits(BillingError, Error);
+util.inherits(InternalError, BillingError);
+util.inherits(InvalidRequestError, BillingError);
+util.inherits(NotFoundError, BillingError);
+
 function promise(f) {
   var d = when.defer();
   f(nodefn.createCallback(d.resolver));
   return d.promise;
+}
+
+function checkNotFound(obj) {
+  if (null == obj) {
+    throw new NotFoundError();
+  }
+  return obj;
 }
 
 function findAllProducts() {
@@ -22,20 +55,28 @@ function findAllProducts() {
 }
 
 function findProductById(id) {
+  if (!/^([0-9a-f]){24}$/.test(id)) {
+    return when.reject(new NotFoundError());
+  }
+
   return promise(function(r) {
     model.Product.findById(id).lean(true).exec(r);
-  });
+  })
+  .then(checkNotFound);
 }
 
 // TODO: understand if _.assign destroys mongoose object and therefore preventing validation
 function updateProduct(updatedProduct) {
-  return promise(function(r) { model.Product.findById(updatedProduct._id, r); })
-    .then(function(product) {
-      return promise(function(r) {
-        product = _.assign(product, updatedProduct);
-        product.save(r);
-      });
+  return promise(function(r) { 
+    model.Product.findById(updatedProduct._id, r); 
+  })
+  .then(checkNotFound)
+  .then(function(product) {
+    return promise(function(r) {
+      product = _.assign(product, updatedProduct);
+      product.save(r);
     });
+  });
 }
 
 function createStatementForSubscriber(subscriber) {
@@ -70,11 +111,13 @@ function findSubscriberByAlias(alias) {
       .lean(true)
       .populate('statements subscriptions.product subscriptions.usages')
       .exec(r);
-  });
+  })
+  .then(checkNotFound);
 }
 
 function createSubscriber(newSubscriber) {
   var subscriber = null;
+
   return promise(function(r) {
     model.Subscriber.create(newSubscriber, r);
   })
@@ -83,7 +126,7 @@ function createSubscriber(newSubscriber) {
     return { email: subscriber.email };
   })
   .then(stripeClient.customers.create.bind(stripeClient.customers), function(err) {
-    if (null != subscriber) {
+    if (err instanceof stripe.StripeError && null != subscriber) {
       subscriber.remove();
     }
     throw err;
@@ -99,11 +142,40 @@ function createSubscriber(newSubscriber) {
   .then(createStatementForSubscriber);
 }
 
+function updateSubscriber(subscriberAlias, subscriberBody) {
+  if (subscriberAlias != subscriberBody.accountAlias) {
+    return when.reject(new InvalidRequestError('alias does not match'));
+  }
+
+  return promise(function(r) {
+    model.Subscriber.findOne({accountAlias: subscriberAlias}, r);
+  })
+  .then(checkNotFound)
+  .then(function(subscriber) {
+    if (subscriber.id != subscriberBody._id) {
+      throw new InvalidRequestError('_id is not correct');
+    }
+
+    _.assign(subscriber, _.pick(subscriberBody, 
+      'accountName',
+      'contactFirstName',
+      'contactLastName',
+      'email'));
+
+    return promise(function(r) {
+      subscriber.save(function(err, subscriber) {
+        r(err, subscriber);
+      });
+    });
+  });
+}
+
 function addCardForSubscriber(subscriberAlias, cardToken) {
   var subscriber = null;
   return promise(function(r) {
     model.Subscriber.findOne({accountAlias: subscriberAlias}, r);
   })
+  .then(checkNotFound)
   .then(function(savedSubscriber) {
     subscriber = savedSubscriber;
     return stripeClient.customers.update(subscriber.stripeCustomerId, {card: cardToken});
@@ -140,12 +212,17 @@ function addCardForSubscriber(subscriberAlias, cardToken) {
 }
 
 function addSubscriptionForSubscriber(subscriberAlias, productAlias, planAlias, startDate) {
-  return when.join(promise(function(r) {
-    model.Subscriber.findOne({accountAlias: subscriberAlias}, r);
-  }),
-  promise(function(r) {
-    model.Product.findOne({alias: productAlias}, r);
-  }))
+  return when.join(
+    promise(function(r) {
+      model.Subscriber.findOne({accountAlias: subscriberAlias}, r);
+    })
+    .then(checkNotFound),
+
+    promise(function(r) {
+      model.Product.findOne({alias: productAlias}, r);
+    })
+    .then(checkNotFound)
+  )
   .then(function(values) {
     var subscriber = values[0];
     var product = values[1];
@@ -171,7 +248,8 @@ function findSubscriberWithProducts(subscriberAlias) {
       .findOne({accountAlias: subscriberAlias})
       .populate('subscriptions.product')
       .exec(r);
-  });
+  })
+  .then(checkNotFound);
 }
 
 function changeSeats(subscriberAlias, productAlias, seatAlias, delta, memo) {
@@ -258,15 +336,21 @@ function recordMeterReading(subscriberAlias, productAlias, meterAlias, value, me
 }
 
 function prepareClose(subscriber, closingDate) {
+  console.log(util.format('Preparing statement closing for subscriber %s with closing date: %s', subscriber._id, closingDate));
   var statement = null;
 
   function findLastStatement(subscriber) {
     return promise(function(r) {
       model.Statement.findById(_.last(subscriber.statements), r);
+    })
+    .then(function(statement) {
+      console.log(util.format('Processing statement %s.', statement._id));
+      return statement;
     });
   }
 
   function prepareStatement(lastStatement) {
+    console.log(util.format('Preparing statement %s.', lastStatement._id));
     statement = lastStatement;
     statement.endDate = closingDate;
     statement.status = 'Closing';
@@ -275,6 +359,7 @@ function prepareClose(subscriber, closingDate) {
 
   function aggregateUsages(statement) {
     var subscriptionIds = _(subscriber.subscriptions).pluck('id').map(ObjectID).value();
+    console.log('Collating usages for statement %s with subscriptions %j', subscriptionIds);
     return promise(function(r) {
       model.Usage.aggregate(subscriptionIds, statement.startDate, statement.endDate.clone().addDays(1), r);
     });
@@ -294,6 +379,8 @@ function prepareClose(subscriber, closingDate) {
   }
 
   function computeCharges(usages) {
+    console.log('Computing charges for statement %s', statement._id);
+
     return _(subscriber.subscriptions)
       .map(function(subscription) {
         var plan = _.find(subscription.product.plans, {alias: subscription.plan});
@@ -347,6 +434,7 @@ function prepareClose(subscriber, closingDate) {
   }
 
   function recordCharges(charges) {
+    console.log('Recording charges on statement %s', statement._id);
     statement.charges = charges;
     statement.balanceDue = statement.openingBalance + total(charges);
     return promise(function(r) {
@@ -364,6 +452,8 @@ function prepareClose(subscriber, closingDate) {
 }
 
 function chargeCustomer(subscriber, statement, closingDate) {
+  console.log('Processing charges for statement %s', statement._id);
+
   return stripeClient.charges.create({
     amount: statement.balanceDue,
     currency: 'usd',
@@ -371,8 +461,9 @@ function chargeCustomer(subscriber, statement, closingDate) {
     description: util.format('Charge for statement ending %s.', closingDate.toFormat('MM/DD/YYYY'))
   })
   .then(function(charge) {
-    console.log(charge);
     return promise(function(r) {
+      console.log('Charge processed: %s', charge.id);
+
       statement.payments.push({
         timestamp: charge.created * 1000,
         success: true,
@@ -393,6 +484,8 @@ function chargeCustomer(subscriber, statement, closingDate) {
       });
     });
   }, function(err) {
+    console.error('Charge failed -', err);
+
     if (!(err instanceof stripe.CardError)) {
       throw err;
     }
@@ -420,6 +513,8 @@ function chargeCustomer(subscriber, statement, closingDate) {
 }
 
 function reallyCloseStatement(statement, subscriber) {
+  console.log('Really closing off statement %s.', statement._id);
+
   return promise(function(r) {
     statement.currentCharges = _.reduce(statement.charges, function(currentCharges, charge) {
       var total = charge.total ? charge.total : charge.quantity * charge.unit;
@@ -432,8 +527,6 @@ function reallyCloseStatement(statement, subscriber) {
       return currentPayments + paymentAmount;
     }, 0.0);
 
-    console.log(subscriber.contactFirstName)
-    console.log(subscriber.contactLastName)
     var contactName = (subscriber.contactFirstName || '') + ' ' + (subscriber.contactLastName || '');
 
     statement.contact = {
@@ -451,6 +544,8 @@ function reallyCloseStatement(statement, subscriber) {
 }
 
 function createNextStatement(subscriber, startDate, openingBalance) {
+  console.log(util.format('Creating next statement for subscriber %s with start date of: %s', subscriber.accountAlias, startDate));
+
   return promise(function(r) {
     model.Statement.create({
       subscriber: subscriber.id,
@@ -470,6 +565,8 @@ function createNextStatement(subscriber, startDate, openingBalance) {
 }
 
 function closeStatement(subscriberAlias, closingDate) {
+  // TODO: make close statement idempotent
+  // TODO: make close statement an orchestration
   var subscriber = null;
 
   return promise(function(r) {
@@ -478,6 +575,7 @@ function closeStatement(subscriberAlias, closingDate) {
       .populate('subscriptions.product')
       .exec(r);
   })
+  .then(checkNotFound)
   .then(function prepareStatement(savedSubscriber) {
     subscriber = savedSubscriber;
     return prepareClose(subscriber, closingDate);
@@ -491,6 +589,7 @@ function closeStatement(subscriberAlias, closingDate) {
   .then(function(closedStatement) {
     return createNextStatement(subscriber, closingDate.clone().addDays(1), closedStatement.balanceDue);
   });
+  // TODO:  .then(sendNotification)
 }
 
 module.exports = {
@@ -508,10 +607,16 @@ module.exports = {
     findAll: findAllSubscribers,
     findByAlias: findSubscriberByAlias,
     create: createSubscriber,
+    update: updateSubscriber,
     addCard: addCardForSubscriber,
     addSubscription: addSubscriptionForSubscriber,
     changeSeats: changeSeats,
     recordMeterReading: recordMeterReading,
     closeStatement: closeStatement
-  }
+  },
+
+  BillingError: BillingError,
+  InternalError: InternalError,
+  InvalidRequestError: InvalidRequestError,
+  NotFoundError: NotFoundError
 };
