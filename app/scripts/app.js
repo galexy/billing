@@ -86,11 +86,11 @@ angular.module('billingApp', ['ngResource', 'ui.bootstrap'])
         templateUrl: 'views/subscriber.html',
         controller: 'SubscriberCtrl'
       })
-      .when('/subscribers/:subscriberId', {
+      .when('/subscribers/:subscriberAlias', {
         templateUrl: 'views/subscriber.html',
         controller: 'SubscriberCtrl'
       })
-      .when('/subscribers/:subscriberId/subscriptions/:subscriptionId', {
+      .when('/subscribers/:subscriberAlias/subscriptions/:subscriptionId', {
         templateUrl: 'views/subscriptiondetail.html',
         controller: 'SubscriptionDetailCtrl'
       })

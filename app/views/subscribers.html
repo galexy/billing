@@ -12,11 +12,11 @@
   </thead>
   <tbody>
     <tr ng-repeat="subscriber in subscribers">
-      <td><a href="#/subscribers/{{subscriber._id}}">{{subscriber.accountName}}</a></td>
+      <td><a href="#/subscribers/{{subscriber.accountAlias}}">{{subscriber.accountName}}</a></td>
       <td><a href="mailto:{{subscriber.email}}">{{subscriber.email}}</a></td>
       <td>Some time</td>
       <td>{{subscriber.nextProcessingDate | date:'mediumDate'}}</td>
-      <td>{{0 | currency:'$'}}</td>
+      <td>{{0 | cents}}</td>
     </tr>
   </tbody>
 </table>

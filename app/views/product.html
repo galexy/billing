@@ -37,7 +37,7 @@
         <table>
           <tr data-ng-repeat="tier in component.pricing">
             <td>{{tier.start}} - {{tier.end | infinte}} units</td>
-            <td>{{tier.unitcost / 100 | currency:"$"}}
+            <td>{{tier.unitcost | cents}}
           </tr>
         </table>
       </td>

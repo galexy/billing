@@ -80,10 +80,13 @@ UsageSchema.statics.aggregate = function(subscriptionIds, startDate, endDate, ca
             }
           }, currentPeriodSeats);
 
-          return callback(null, meteredUsages, currentPeriodSeats);
-        })
+          return callback(null, {
+            meters: meteredUsages,
+            seats: currentPeriodSeats
+          });
+        });
       });
     });
-}
+};
 
 module.exports = mongoose.model('Usage', UsageSchema);

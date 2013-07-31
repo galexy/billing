@@ -1,3 +1,5 @@
+'use strict';
+
 var _        = require('lodash');
 var express  = require('express');
 var model    = require('./model');
@@ -57,14 +59,14 @@ api.post('/subscribers', function(req, res) {
     .then(sendRes.bind(res), sendError.bind(res));
 });
 
-api.get('/subscribers/:subscriberId', function(req, res) {
+api.get('/subscribers/:subscriberAlias', function(req, res) {
   billing.subscribers
-    .findById(req.params.subscriberId)
+    .findByAlias(req.params.subscriberAlias)
     .then(sendRes.bind(res), sendError.bind(res));
 });
 
-api.put('/subscribers/:subscriberId', function(req, res) {
-  model.Subscriber.findById(req.params.subscriberId).exec()
+api.put('/subscribers/:subscriberAlias', function(req, res) {
+  model.Subscriber.findOne({accountAlias: req.params.subscriberAlias}).exec()
     .then(function(subscriber) {
       var updatedSubscriber = _.assign(subscriber, req.body);
       var p = new mongoose.Promise();
@@ -82,9 +84,9 @@ api.put('/subscribers/:subscriberId', function(req, res) {
     });
 });
 
-api.del('/subscribers/:subscriberId', function(req, res) {
+api.del('/subscribers/:subscriberAlias', function(req, res) {
   var p = new mongoose.Promise();
-  model.Subscriber.remove({_id: req.params.subscriberId}, function(err) {
+  model.Subscriber.remove({accountAlias: req.params.subscriberAlias}, function(err) {
     if (err) {
       return p.error(err);
     }
@@ -98,13 +100,13 @@ api.del('/subscribers/:subscriberId', function(req, res) {
   });
 });
 
-api.post('/subscribers/:subscriberId/addCard', function(req, res) {
-  billing.subscribers.addCard(req.params.subscriberId, req.query.token)
+api.post('/subscribers/:subscriberAlias/addCard', function(req, res) {
+  billing.subscribers.addCard(req.params.subscriberAlias, req.query.token)
     .then(sendRes.bind(res), sendError.bind(res));
 });
 
-api.post('/subscribers/:subscriberId/addSubscription', function(req, res) {
-  billing.subscribers.addSubscription(req.params.subscriberId, req.query.product, req.query.plan, req.query.startDate)
+api.post('/subscribers/:subscriberAlias/addSubscription', function(req, res) {
+  billing.subscribers.addSubscription(req.params.subscriberAlias, req.query.product, req.query.plan, req.query.startDate)
     .then(sendRes.bind(res), sendError.bind(res));
 });
 
@@ -123,9 +125,18 @@ api.post('/subscribers/:subscriberAlias/subscriptions/:productAlias/meters/:mete
     req.params.subscriberAlias,
     req.params.productAlias,
     req.params.meterAlias,
-    parseInt(req.query.value),
+    parseInt(req.query.value, 10),
     req.query.memo
   ).then(sendRes.bind(res), sendError.bind(res));
+});
+
+api.post('/subscribers/:subscriberAlias/closeStatement', function(req, res) {
+  var closingDate = new Date(parseInt(req.query.closingDate, 10)).clearTime();
+
+  billing
+    .subscribers
+    .closeStatement(req.params.subscriberAlias, closingDate)
+    .then(sendRes.bind(res), sendError.bind(res));
 });
 
 module.exports = api;

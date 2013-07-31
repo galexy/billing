@@ -5,7 +5,7 @@ angular.module('billingApp')
     /*
      * Model
      */
-    $scope.subscriber = Subscriber.get({subscriberId: $routeParams.subscriberId}, function(subscriber) {
+    $scope.subscriber = Subscriber.get({subscriberAlias: $routeParams.subscriberAlias}, function(subscriber) {
       $scope.subscription = _.find(subscriber.subscriptions, {_id: $routeParams.subscriptionId});
     }, function(err) {
       console.log(err);

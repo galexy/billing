@@ -41,47 +41,6 @@ var SubscriberSchema = new Schema({
   statements: [{type: Schema.Types.ObjectId, ref: 'Statement'}]
 }, {strict: true});
 
-SubscriberSchema.statics.findOrCreate = function(subscriber, callback) {
-  var self = this;
-  self.findOne({accountAlias: subscriber.accountAlias}, function(err, existingSubscriber) {
-    if (err || existingSubscriber) {
-      return callback(err, existingSubscriber);
-    }
-
-    if (!existingSubscriber) {
-      var newSubscriber = _.assign(_.pick(subscriber, 'accountName', 'accountAlias', 'email', 'contactFirstName', 'contactLastName', 'nextProcessingDate'), {status: 'Active'});
-
-      self.create(newSubscriber, callback);
-    }
-  });
-};
-
-SubscriberSchema.methods.addSubscription = function(subscription, callback) {
-  var self = this;
-
-  Product.findOne({name: subscription.product.name}, function(err, product) {
-    if (err) {
-      return callback(err);
-    }
-
-    // TODO: handle missing product
-    // TODO: handle missing plan
-
-    self.subscriptions.push({
-      product: product,
-      plan: subscription.product.plan,
-      startDate: Date.today(),
-      status: 'Active',
-      activities: [{type: Activity.types.signedup, params: {product: product.name}}]
-    });
-
-    self.save(callback);
-  });
-};
-
-SubscriberSchema.methods.currentStatement = function(callback) {
-  var lastStatementId = _.last(this.statements);
-  Statement.findById(lastStatementId, callback);
-};
+SubscriberSchema.index({accountAlias: 1}, {unique: true});
 
 module.exports = mongoose.model('Subscriber', SubscriberSchema);

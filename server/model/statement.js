@@ -10,8 +10,9 @@ var ChargeSchema = new Schema({
   timestamp: {type: Date, required: true, default: Date.now},
   kind: {type: String, required: true},
   detail: {type: String, required: true},
-  unit: {type: Number, required: true},
-  quantity: {type: Number, required: true}
+  unit: Number,
+  quantity: {type: Number, required: true},
+  total: Number
 });
 
 var PaymentSchema = new Schema({
@@ -27,7 +28,7 @@ var StatementSchema = new Schema({
   subscriber: {type: Schema.ObjectId, ref: 'Subscriber'},
   startDate: {type: Date, required: true},
   endDate: {type: Date, default:null},
-  status: {type: String, required: true, enum: ['Open', 'Closing', 'Closed']},
+  status: {type: String, required: true, enum: ['Open', 'Closing', 'Charged', 'Closed']},
   paid: {type: Boolean, required: true, default: false},
   openingBalance: {type: Number, required: true},
   balanceDue: Number,

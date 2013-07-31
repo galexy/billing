@@ -5,7 +5,7 @@ angular.module('billingApp')
     /*
      * Model
      */
-    $scope.isNew = angular.isUndefined($routeParams.subscriberId);
+    $scope.isNew = angular.isUndefined($routeParams.subscriberAlias);
 
     $scope.subscriber = $scope.isNew ? {} : Subscriber.get($routeParams);
 
@@ -72,6 +72,16 @@ angular.module('billingApp')
         }, function(err) {
           console.log(err);
         });
+      });
+    };
+
+    $scope.closeStatement = function() {
+      $scope.subscriber.$closeStatement({
+        closingDate: (new Date()).valueOf()
+      }, function() {
+        console.log('look ma, no hands');
+      }, function(err) {
+        console.log(err);
       });
     };
   });
