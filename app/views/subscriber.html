@@ -120,18 +120,20 @@
           <th>Period</th>
           <th>Status</th>
           <th>Paid</th>
-          <th>Payment</th>
           <th>Opening Balance</th>
+          <th>Charges</th>
+          <th>Payments</th>
           <th>Balance Due</th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="statement in subscriber.statements">
-          <td><a href="/subscribers/{{subscriber.accountAlias}}/statements/{{statement._id}}">{{statement.startDate | date:'mediumDate'}} - {{statement.endDate | date:'mediumDate'}}</a></td>
+          <td><a href="#/subscribers/{{subscriber.accountAlias}}/statements/{{statement._id}}">{{statement.startDate | date:'mediumDate'}} - {{statement.endDate | date:'mediumDate'}}</a></td>
           <td>{{statement.status}}</td>
           <td>{{statement.paid | yesno}}</td>
-          <td>Huh?</td>
           <td>{{statement.openingBalance | cents}}</td>
+          <td>{{statement.currentCharges | cents}}</td>
+          <td>{{statement.currentPayments | cents}}</td>
           <td>{{statement.balanceDue | cents}}</td>
         </tr>
       </tbody>

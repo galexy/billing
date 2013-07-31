@@ -32,6 +32,9 @@ var StatementSchema = new Schema({
   paid: {type: Boolean, required: true, default: false},
   openingBalance: {type: Number, required: true},
   balanceDue: Number,
+  currentCharges: Number,
+  currentPayments: Number,
+  paymentDate: Date,
   charges: [ChargeSchema],
   payments: [PaymentSchema]
 }, {strict: true});

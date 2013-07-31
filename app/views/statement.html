@@ -1,0 +1,93 @@
+<h3>{{subscriber.accountName}}</h3>
+<h4>Subscriber since {{subscriber.startDate | date:'mediumDate'}}</h4>
+<hr />
+<h4>Statement Ending {{statement.endDate | date:'mediumDate'}} - <span data-ng-class="'text-success'">{{statement.paid | iif : 'Paid' : 'Balance Due'}}</span></h4>
+<div class="row">
+  <div class="span4">
+    <h5>Account Information</h5>
+    <address>
+      <strong>{{subscriber.contactFirstName}} {{subscriber.contactLastName}}</strong><br>
+      <a href="mailto:{{subscriber.email}}">{{subscriber.email}}</a>
+    </address>
+    <address>
+      <strong>Billing Address</strong><br>
+      {{subscriber.streetAddress1}}<br>
+      {{subscriber.city}}, {{subscriber.state}} {{subscriber.zipcode}}<br>
+      <abbr title="Phone">P:</abbr> ({{subscriber.phone.areacode}}) {{subscriber.phone.number}}
+    </address>
+  </div>
+  <div class="span5">
+    <h5>Statement Summary</h5>
+    <dl class="dl-horizontal">
+      <dt>Statement Date</dt>
+      <dd>{{statement.endDate | date:'mediumDate'}}</dd>
+      <dt>Statement Period</dt>
+      <dd>{{statement.startDate | date:'mediumDate'}} - {{statement.endDate | date:'mediumDate'}}</dd>
+      <dt>Carry Forward Balance</dt>
+      <dd>{{statement.openingBalance | cents}}</dd>
+      <dt>Current Charges</dt>
+      <dd>{{statement.currentCharges | cents}}</dd>
+      <dt>Payments &amp; Credits</dt>
+      <dd>{{statement.currentPayments | cents}}</dd>
+      <dt>Ending Balance</dt>
+      <dd>{{statement.balanceDue | cents}}</dd>
+      <dt>Payment Date</dt>
+      <dd>{{statement.paymentDate | date:'mediumDate'}}</dd>
+    </dl>
+  </div>
+</div>
+<div class="row">
+  <div class="span9">
+    <h5>Statement Details</h5>
+    <hr />
+
+    <h5>Current Charges</h5>
+    <table class="table table-condensed">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Detail</th>
+          <th>Quantity</th>
+          <th>Unit</th>
+          <th>Charge</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="charge in statement.charges">
+          <td>{{charge.timestamp | date:'shortDate'}}</td>
+          <td>{{charge.kind}}</td>
+          <td>{{charge.detail}}</td>
+          <td>{{charge.quantity}}</td>
+          <td>{{charge.unit | cents}}</td>
+          <td ng-show="charge.total">{{charge.total | cents}}</td>
+          <td ng-hide="charge.total">{{charge.quantity * charge.unit | cents}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr />
+
+    <h5>Payments &amp; Credits</h5>
+    <table class="table table-condensed">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Detail</th>
+          <th>Success</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="payment in statement.payments">
+          <td>{{payment.timestamp | date:'shortDate'}}</td>
+          <td>{{payment.kind}}</td>
+          <td>{{payment.message}}</td>
+          <td>{{payment.success | yesno}}</td>
+          <td>{{payment.amount | cents}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -94,6 +94,10 @@ angular.module('billingApp', ['ngResource', 'ui.bootstrap'])
         templateUrl: 'views/subscriptiondetail.html',
         controller: 'SubscriptionDetailCtrl'
       })
+      .when('/subscribers/:subscriberAlias/statements/:statementId', {
+        templateUrl: 'views/statement.html',
+        controller: 'StatementCtrl'
+      })
       .otherwise({
         redirectTo: '/login'
       });

@@ -365,7 +365,8 @@ function chargeCustomer(subscriber, statement, closingDate) {
       statement.balanceDue = Math.max(statement.balanceDue - charge.amount, 0);
 
       statement.paid = (statement.balanceDue === 0);
-      statement.status = 'Closed';
+      statement.paymentDate = charge.created * 1000;
+      statement.status = 'Charged';
       statement.save(function(err, statement) {
         r(err, statement);
       });
@@ -389,10 +390,30 @@ function chargeCustomer(subscriber, statement, closingDate) {
 
     return promise(function(r) {
       statement.payments.push(failedPayment);
-      statement.status = 'Closed';
+      statement.status = 'Charged';
       statement.save(function(err, statement) {
         r(err, statement);
       });
+    });
+  });
+}
+
+function reallyCloseStatement(statement) {
+  return promise(function(r) {
+    statement.currentCharges = _.reduce(statement.charges, function(currentCharges, charge) {
+      var total = charge.total ? charge.total : charge.quantity * charge.unit;
+      currentCharges = currentCharges + total;
+      return currentCharges;
+    }, 0.0);
+
+    statement.currentPayments = _.reduce(statement.payments, function(currentPayments, payment) {
+      var paymentAmount = payment.success ? payment.amount : 0;
+      return currentPayments + paymentAmount;
+    }, 0.0);
+
+    statement.status = 'Closed';
+    statement.save(function(err, statement) {
+      r(err, statement);
     });
   });
 }
@@ -432,6 +453,7 @@ function closeStatement(subscriberAlias, closingDate) {
   .then(function charge(statement) {
     return chargeCustomer(subscriber, statement, closingDate);
   })
+  .then(reallyCloseStatement)
   .then(function(closedStatement) {
     return createNextStatement(subscriber, closingDate.clone().addDays(1), closedStatement.balanceDue);
   });
