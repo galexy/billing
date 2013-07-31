@@ -1,0 +1,56 @@
+<div class="modal-header">
+  <h3>Add credit card</h3>
+</div>
+<div class="modal-body">
+  <span class="payment-errors"></span>
+
+  <form id="creditCardForm" class="form-horizontal">
+    <div class="control-group">
+      <label class="control-label" for="inputCardNumber">Card Number</label>
+      <div class="controls">
+        <input type="text" size="20" data-ng-model="number">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="inputCardNumber">CVC</label>
+      <div class="controls">
+        <input type="text" size="4" data-ng-model="cvc">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="inputCardNumber">Expiration</label>
+      <div class="controls">
+        <input type="text" size="2" class="input-small" data-ng-model="exp_month" placeholder="MM">
+        <span> / </span>
+        <input type="text" size="4" class="input-small" data-ng-model="exp_year" placeholder="YYYY">
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="control-group">
+      <label class="control-label" for="inputAddressLine1">Billing Address</label>
+      <div class="controls">
+        <input type="text" data-ng-model="address_line1" placeholder="Street Address">
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="controls">
+        <input type="text" data-ng-model="address_city" placeholder="City">
+      </div>
+    </div>
+    <div class="control-group">
+      <div class="controls">
+        <select states="" class="input-small" data-ng-model="address_state">
+        <input type="text" class="input-small" data-ng-model="address_zip" placeholder="Zip">
+      </div>
+    </div>
+
+  </form>
+</div>
+<div class="modal-footer">
+  <button data-ng-click="cancel()" class="btn">Cancel</button>
+  <button data-ng-click="addCard()" class="btn btn-primary">OK</button>
+</div>

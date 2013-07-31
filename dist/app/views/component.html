@@ -1,0 +1,64 @@
+<h2>Component Details</h2>
+<h3>{{component.name}}</h3>
+
+<form class="form-horizontal">
+  <div class="control-group">
+    <label class="control-label" for="inputName">Name</label>
+    <div class="controls">
+      <input type="text" id="inputName" placeholder="Component Name" data-ng-model="component.name" data-ng-disabled="isPlanOverride">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputDescription">Description</label>
+    <div class="controls">
+      <textarea id="inputDescription" rows="3" placeholder="Description" data-ng-model="component.description" data-ng-disabled="isPlanOverride">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputHandle">Handle</label>
+    <div class="controls">
+      <input type="text" id="inputHandle" placeholder="Handle" data-ng-model="component.alias" data-ng-disabled="isPlanOverride">
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="control-group">
+    <label class="control-label" for="inputKind">Kind</label>
+    <div class="controls">
+      <select data-ng-model="component.kind" data-ng-options="c for c in componentKinds" data-ng-disabled="isPlanOverride">
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" for="inputUnit">Unit Name</label>
+    <div class="controls">
+      <input type="text" id="inputUnit" placeholder="Unit" data-ng-model="component.unitName" data-ng-disabled="isPlanOverride">
+    </div>
+  </div>
+
+</form>
+
+<hr>
+
+<h4>Tiers</h4>
+<div data-ng-repeat="tier in component.pricing">
+  <form class="form-inline">
+    <label>Starting</label>
+    <input type="number" class="input-small" data-ng-model="tier.start">
+    <label>Ending</label>
+    <input type="number" class="input-small" data-ng-model="tier.end">
+    <label>Unit Price</label>
+    <div class="input-prepend">
+      <span class="add-on">$</span>
+      <input type="number" step="0.01" class="input-small" data-ng-model="tier.unitcost" money="">
+    </div>
+    <button class="close" data-ng-hide="$first" data-ng-click="removeTier($index)">&times;</button>
+  </form>
+</div>
+<a data-ng-click="addTier()">+ Add Tier</a>
+
+<hr>
+
+<a class="btn btn-success" data-ng-click="save()">Save Changes</a> or <a data-ng-click="cancel()">Cancel</a>
+<a class="btn btn-danger pull-right" data-ng-click="deleteComponent()">Delete Component</a>

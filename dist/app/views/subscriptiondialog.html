@@ -1,0 +1,31 @@
+<div class="modal-header">
+  <h3>Add Subscription</h3>
+</div>
+<div class="modal-body">
+  <form class="form-horizontal">
+    <div class="control-group">
+      <label class="control-label" for="inputProduct">Product</label>
+      <div class="controls">
+        <select data-ng-model="product" data-ng-options="p.name for p in availableProducts"></select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="inputPlan">Plan</label>
+      <div class="controls">
+        <select data-ng-model="plan" data-ng-options="p.name for p in product.plans"></select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="inputStartDate">Start Date</label>
+      <div class="controls">
+        <input type="text" data-ng-model="startDate" data-dateinput="">
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button data-ng-click="cancel()" class="btn">Cancel</button>
+  <button data-ng-click="addSubscription()" class="btn btn-primary">OK</button>
+</div>

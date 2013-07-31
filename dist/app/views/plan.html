@@ -1,0 +1,66 @@
+<h2>Plan Details</h2>
+<h3>{{plan.name}}</h3>
+
+<form class="form-horizontal">
+  <div class="control-group">
+    <label class="control-label" for="inputName">Name</label>
+    <div class="controls">
+      <input type="text" id="inputName" placeholder="Plan Name" data-ng-model="plan.name">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputDescription">Description</label>
+    <div class="controls">
+      <textarea rows="3" id="inputDescription" placeholder="Description" data-ng-model="plan.description">
+      </textarea>
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputHandle">Handle</label>
+    <div class="controls">
+      <input type="text" id="inputHandle" placeholder="Handle" data-ng-model="plan.alias">
+    </div>
+  </div>
+  <hr>
+  <h4>Billing Setup</h4>
+  <div class="control-group">
+    <label class="control-label" for="inputMonthlyFee">Monthly Fee</label>
+    <div class="controls">
+      <div class="input-prepend input-append">
+        <span class="add-on">$</span>
+        <input type="number" id="inputMonthlyFee" data-ng-model="plan.unitcost" money="">
+    </div>
+  </div>
+  <hr>
+  <h4>Component Overrides</h4>
+  <table class="table table-striped table-hover table-condensed">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Kind</th>
+        <th>Tiers</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr data-ng-repeat="component in plan.components">
+        <td><a href="#/products/{{product._id}}/plans/{{plan._id}}/components/{{component._id}}">{{component.name}}</a></td>
+        <td>{{component.kind}}</td>
+        <td>
+          <table>
+            <tr data-ng-repeat="tier in component.pricing">
+              <td>{{tier.start}} - {{tier.end | infinte}} units</td>
+              <td>{{tier.unitcost | cents}}
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <a data-ng-click="addComponent()">+ Add Component Override</a>
+</div></form>
+
+<hr>
+
+<a class="btn btn-success" data-ng-click="save()">Save Changes</a> or <a data-ng-click="cancel()">Cancel</a>
+<a class="btn btn-danger pull-right" data-ng-click="deletePlan()">Delete Plan</a>
