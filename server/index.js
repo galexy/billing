@@ -7,7 +7,7 @@ var Authentication = require('./authentication');
 
 var app            = express();
 
-app.use(express.logger('dev'));
+app.use(express.logger('default'));
 
 // marker for `grunt-express` to inject static folder/contents
 app.use(function staticsPlaceholder(req, res, next) {
@@ -15,7 +15,7 @@ app.use(function staticsPlaceholder(req, res, next) {
 });
 
 app.use(express.cookieParser());
-app.use(express.session({secret: 'foljkfdsa932ljf9'}));
+app.use(express.session({secret: process.env.SESSION_SECRET}));
 app.use(express.bodyParser());
 
 // Add csrf support
