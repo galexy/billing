@@ -268,11 +268,11 @@ function changeSeats(subscriberAlias, productAlias, seatAlias, delta, memo) {
       component = _.find(subscription.product.components, {kind: 'Seat', alias: seatAlias});
 
       if (null == subscription) {
-        throw InternalError('Could not find subscription');
+        throw new InternalError('Could not find subscription');
       }
 
       if (null == component) {
-        throw InternalError('Could not find component');
+        throw new InternalError('Could not find component');
       }
     })
     .then(function() {
