@@ -8,27 +8,31 @@ var User = require('./model').User;
 module.exports = {
   localStrategy: new LocalStrategy(
     function(username, password, done) {
-      var user = User.findByUsername(username);
-
-      if(!user) {
-        done(null, false, { message: 'Incorrect username.' });
-      } else if(user.password != password) {
-        done(null, false, { message: 'Incorrect password.' });
-      } else {
-        return done(null, user);
-      }
+      User
+        .findByUsername(username)
+        .then(function(user) {
+          if(!user) {
+            return done(null, false, { message: 'Incorrect username.' });
+          } else if(user.password != password) {
+            return done(null, false, { message: 'Incorrect password.' });
+          } else {
+            return done(null, user);
+          }
+        });
     }
   ),
 
   basicStrategy: new BasicStrategy(
     function(username, password, done) {
-      var user = User.findApiKeyByName(username);
-
-      if (!user) {
-        done(null, false, { message: 'Invalid API Key.'});
-      } else {
-        done(null, user);
-      }
+      User
+        .findApiKeyByName(username)
+        .then(function(user) {
+          if (!user) {
+            done(null, false, { message: 'Invalid API Key.'});
+          } else {
+            done(null, user);
+          }
+        });
     }
   ),
 
@@ -37,13 +41,15 @@ module.exports = {
   },
 
   deserializeUser: function(id, done) {
-    var user = User.findById(id);
-
-    if (user) {
-      done(null, user);
-    } else {
-      done(null, false);
-    }
+    User
+      .findById(id)
+      .then(function(user) {
+        if (user) {
+          done(null, user);
+        } else {
+          done(null, false);
+        }
+      });
   },
 
   login: function(req, res, next) {
