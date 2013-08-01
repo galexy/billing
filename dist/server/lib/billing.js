@@ -368,7 +368,7 @@ function prepareClose(subscriber, closingDate) {
   function computeComponentCharge(component, totalQuantity, initCharge) {
     return _.reduce(component.pricing, function(charge, tier) {
       var quantity = 0;
-      if (totalQuantity >= tier.end) {
+      if (null != tier.end && totalQuantity >= tier.end) {
         quantity = tier.end - tier.start + 1;
       } else if (totalQuantity >= tier.start) {
         quantity = totalQuantity - tier.start + 1;
@@ -399,7 +399,10 @@ function prepareClose(subscriber, closingDate) {
             .where({subscription: subscription._id})
             .map(function(seat) {
               var component = subscription.product.components.id(seat.component);
-              return computeComponentCharge(component, seat.quantity, {
+              var overrideComponent = _.find(plan.components, {alias: component.alias});
+              var effectiveComponent = overrideComponent || component;
+
+              return computeComponentCharge(effectiveComponent, seat.quantity, {
                 kind: 'Seat',
                 detail: component.name,
                 quantity: seat.quantity,
@@ -413,7 +416,10 @@ function prepareClose(subscriber, closingDate) {
             .where({subscription: subscription._id})
             .map(function(meter) {
               var component = subscription.product.components.id(meter.component);
-              return computeComponentCharge(component, meter.quantity, {
+              var overrideComponent = _.find(plan.components, {alias: component.alias});
+              var effectiveComponent = overrideComponent || component;
+
+              return computeComponentCharge(effectiveComponent, meter.quantity, {
                 kind: 'Metered',
                 detail: component.name,
                 quantity: meter.quantity,
