@@ -67,8 +67,8 @@ function findProductById(id) {
 
 // TODO: understand if _.assign destroys mongoose object and therefore preventing validation
 function updateProduct(updatedProduct) {
-  return promise(function(r) { 
-    model.Product.findById(updatedProduct._id, r); 
+  return promise(function(r) {
+    model.Product.findById(updatedProduct._id, r);
   })
   .then(checkNotFound)
   .then(function(product) {
@@ -156,7 +156,7 @@ function updateSubscriber(subscriberAlias, subscriberBody) {
       throw new InvalidRequestError('_id is not correct');
     }
 
-    _.assign(subscriber, _.pick(subscriberBody, 
+    _.assign(subscriber, _.pick(subscriberBody,
       'accountName',
       'contactFirstName',
       'contactLastName',
@@ -208,6 +208,12 @@ function addCardForSubscriber(subscriberAlias, cardToken) {
         r(err, subscriber);
       });
     });
+  }, function(err) {
+    if (err instanceof stripe.CardError) {
+      throw new BillingError('Error processing card', err.error);
+    } else {
+      throw new InternalError();
+    }
   });
 }
 

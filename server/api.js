@@ -26,6 +26,11 @@ function sendError(err) {
     return this.send(404, err.message);
   } else if (err instanceof billing.InvalidRequestError) {
     return this.send(400, err.message);
+  } else if (err instanceof billing.BillingError) {
+    return this.send(400, {
+      message: err.message,
+      error: err.error
+    });
   } else if (err.name == 'MongoError' && err.code == 11000) {
     return this.send(400, 'Duplicate Error');
   } else {

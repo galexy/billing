@@ -52,7 +52,7 @@ angular.module('billingApp', [
 ]).run([
   '$window',
   function ($window) {
-    $window.Stripe.setPublishableKey('pk_test_kN2L3DR9qFOegK9KRHmd9v0K');
+    $window.Stripe.setPublishableKey('pk_live_Qft1frp8pcba3IYnb8Dhk2Ee');
   }
 ]).config([
   '$routeProvider',
